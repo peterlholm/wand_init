@@ -1,0 +1,23 @@
+#
+# this is the danwand standard init service
+# 220402 PLH    First version
+#
+
+[Unit]
+Description=Danwand Init Service
+Documentation=http://doc.danbots.com/mode/config.html
+After=network.target
+StartLimitIntervalSec=30
+
+[Service]
+Type=idle
+Restart=on-failure
+RestartSec=10
+User=root
+Environment=PYTHONUNBUFFERED=1
+StandardOutput=journal
+ExecStart=/usr/local/bin/danwand/init_service  
+WorkingDirectory=/tmp
+
+[Install]
+WantedBy=multi-user.target

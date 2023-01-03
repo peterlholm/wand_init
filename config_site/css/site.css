@@ -1,0 +1,24 @@
+/* danwand config website */
+
+.navbar {
+    background-color: #8098f0;
+}
+
+.background-wand {
+    height: 400px;
+    background-color: pink;
+    background: url("/pic/dW1-bw.png") no-repeat;
+    background-position: center;
+    background-size: contain;
+    /* opacity: 0.3; */
+    /* background-size: cover; */
+}
+
+.fix-button {
+    width: 200px;
+    margin:20px;
+}
+
+meter {
+    width: 200px;
+}

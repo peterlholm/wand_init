@@ -1,0 +1,21 @@
+#
+# danvwand init service
+#
+
+[Unit]
+Description=DanWand Init service
+#After=network.target
+After=dw_init.service
+StartLimitIntervalSec=30
+
+[Service]
+Type=idle
+Restart=always
+RestartSec=10
+User=danwand
+Environment=PYTHONUNBUFFERED=1
+StandardOutput=journal
+ExecStart=/usr/local/bin/danwand/danwand_service
+
+[Install]
+WantedBy=multi-user.target

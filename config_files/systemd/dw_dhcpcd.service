@@ -1,0 +1,11 @@
+[Unit]
+Description=DHCP Client Daemon AccesPoint
+Documentation=man:dhcpcd(8)
+
+Wants=network.target
+Before=network-online.target hostapd.service
+
+[Service]
+Type=forking
+ExecStart=/usr/sbin/dhcpcd -w -q --config /etc/dw_dhcpcd.conf
+Restart=always

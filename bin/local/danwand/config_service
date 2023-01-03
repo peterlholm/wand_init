@@ -1,0 +1,73 @@
+#!/bin/python3
+#
+# Danwand Config Mode
+#
+#   220408  PLH First version
+#   221227  PLH updated with light indications
+#
+# This service establish config AccessPoint mode with website for configuration
+# It reboot if no user is connected after REBOOT_NOUSER_SECONDS
+
+import os
+import sys
+import datetime
+import time
+import subprocess
+from pathlib import Path
+from gpiozero import LED
+
+# pylint: disable=missing-module-docstring
+
+DIAS_LED_PIN = 12
+FLASH_LED_PIN = 13
+
+
+REBOOT_NOUSER_SECONDS = 300  # 5 min
+REBOOT_USER_SECONDS = 1800   # 30 min
+KEEP_CONFIG_MODE_FILE = Path('/var/lib/danwand/configmode')
+REBOOT= True
+_DEBUG = True
+
+dias = LED(DIAS_LED_PIN)
+flash = LED(FLASH_LED_PIN)
+
+flash.on()
+dias.on()
+
+def get_active_wifi_stations():
+    "Gent the number of connected stations to access point"
+    #print(os.name)
+    if os.name != "nt":
+        out = subprocess.check_output("iw dev wlan0 station dump | grep Station | wc -l", shell=True)
+        out = int(out)
+    else:
+        out = 0
+    print("Number active stations", out)
+    return out
+if len(sys.argv)>1:
+    if sys.argv[1] == "noreboot":
+        REBOOT=False
+print(datetime.datetime.now(), "danWand config starting")
+starttime = time.time()
+endtime = starttime + REBOOT_NOUSER_SECONDS
+
+while time.time() < endtime:
+    if get_active_wifi_stations()>0:
+        # user connected
+        dias.on()
+        endtime = starttime + REBOOT_USER_SECONDS
+    else:
+        # no user connected
+        dias.off()
+        endtime = starttime + REBOOT_NOUSER_SECONDS
+    time.sleep(10)
+if KEEP_CONFIG_MODE_FILE.exists():
+    print("Holding in configmode")
+else:
+    dias.off()
+    flash.off()
+    print(datetime.datetime.now(), "Rebooting system")
+    subprocess.run('sudo systemctl --message="Config rebooting" reboot', shell=True, check=False)
+
+print(datetime.datetime.now(), "Config.service ending")
+dias.off()
