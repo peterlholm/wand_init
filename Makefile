@@ -10,27 +10,37 @@ BACKUPDIR=$(HOME)/backupconf
 WEBSITEDIR=/var/www/danwand
 
 default:
+	@echo "install the wand basis services"
 	@echo "make install\tinstall sw and set default config"
-	@echo "make raspbian-config\tConfigure raspbian for danwand and stop unused service"
-	@echo "make help\tDisplay alternative options"
+	#@echo "make raspbian-config\tConfigure raspbian for danwand and stop unused service"
+	#@echo "make help\tDisplay alternative options"
 
 help :
 	@echo "make hostname\tset new wand hostname"	
+	@echo 
+
+	# @echo "Use the following commands:\n"
+	# @echo "make install\tinstall all required basis sw"
+	# @echo "make debug\tdebug users and console"
+	# @echo "make console\tConfigure console for hdmi and keyboard for DK"
+	# @echo "make ipv6-disable\t,Disable ipv6"
+	# @echo "make website\tinstall website"
+	# @echo "make camera-util\tInstall camera dt-blop"
+	# @echo "make get-sw\tGet other sw to $HOME"
+	# @echo "--"
+	# @echo "make service\tinstall register service"
+	# @echo "make python\tinstall Phython requirements"
+	# @echo "make debugtools\tinstall debug sw"
 
 
-	@echo "Use the following commands:\n"
-	@echo "make install\tinstall all required basis sw"
-	@echo "make debug\tdebug users and console"
-	@echo "make console\tConfigure console for hdmi and keyboard for DK"
-	@echo "make ipv6-disable\t,Disable ipv6"
-	@echo "make website\tinstall website"
-	@echo "make camera-util\tInstall camera dt-blop"
-	@echo "make get-sw\tGet other sw to $HOME"
-	@echo "--"
-	@echo "make service\tinstall register service"
-	@echo "make python\tinstall Phython requirements"
-	@echo "make debugtools\tinstall debug sw"
 
+# common
+
+danwand-config-file:	/home/danwand
+	@echo "create configuration files"
+	test -f /etc/danwand.conf || touch /etc/danwand.conf
+	chown danwand /etc/danwand.conf
+	chmod a+rw /etc/danwand.conf
 
 # set hostname to wand
 
@@ -41,6 +51,16 @@ hostname:
 	@echo hostname changed after reboot
 	#raspi-config nonint do_hostname wand
 
+# standard services
+
+danwand-services:	danwand-config-file
+	@echo Installing danWand Services
+	cp -r ./config_files/systemd/* /etc/systemd/system
+	cp -r ./bin/local/* /usr/local/bin/
+	systemctl enable danwand.service
+
+
+
 #config web site
 
 apache-config:
@@ -50,7 +70,8 @@ apache-config:
 	a2dissite 000-default
 	systemctl restart apache2
 
-website:	danwand-lib apache-config
+#website:	danwand-lib apache-config
+website:	apache-config
 	@echo "Installing config site"
 	rm -fr /var/www/config
 	cp -r ./config_site /var/www/config
@@ -110,23 +131,16 @@ install-system:	/var/lib/danwand/install-system user-peter
 
 # configuration of services
 
-apache-config:
-	cp ./config_files/apache/020_www-data /etc/sudoers.d/
-	cp ./config_files/apache/passwords /etc/apache2/
-	cp ./config_files/apache/groups /etc/apache2/
-	#test -f /etc/sudoers.d/020_www-data || echo "www-data ALL=(ALL) NOPASSWD: ALL" >/etc/sudoers.d/020_www-data
-	#systemctl stop apache2
-	a2dissite 000-default
-	systemctl restart apache2
+# apache-config:
+# 	cp ./config_files/apache/020_www-data /etc/sudoers.d/
+# 	cp ./config_files/apache/passwords /etc/apache2/
+# 	cp ./config_files/apache/groups /etc/apache2/
+# 	#test -f /etc/sudoers.d/020_www-data || echo "www-data ALL=(ALL) NOPASSWD: ALL" >/etc/sudoers.d/020_www-data
+# 	#systemctl stop apache2
+# 	a2dissite 000-default
+# 	systemctl restart apache2
 
 	
-# commond danwand
-
-danwand-config-file:	/home/danwand
-	@echo "create configuration files"
-	test -f /etc/danwand.conf || touch /etc/danwand.conf
-	chown danwand /etc/danwand.conf
-	chmod a+rw /etc/danwand.conf
 
 danwand-lib:  /home/danwand
 	mkdir -p /var/lib/danwand 
@@ -145,13 +159,6 @@ danwand-lib:  /home/danwand
 
 danwand-basis:	danwand-config-file /home/danwand
 
-# standard services
-
-danwand-services:
-	@echo Installing danWand Services
-	cp -r ./config_files/systemd/* /etc/systemd/system
-	cp -r ./bin/local/* /usr/local/bin/
-	systemctl enable danwand.service
 
 #
 configmode:	danwand-config-file danwand-services python-req
@@ -185,5 +192,6 @@ get-sw:
 # install: install-system camera-util website configmode python-req danwand-services debug
 # 	@echo "All SW Installed"
 
-install: website 
+#install: website 
+install: 	danwand-services
 	@echo "All SW Installed"

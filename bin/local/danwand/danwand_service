@@ -35,7 +35,7 @@ API_KEY = "92dfe5e2-e433-4935-9252-e1628f2abd83"
 PING_HOST="8.8.8.8"
 REBOOT_CONFIG_TIME = 61
 REGISTERINTERVAL = 300
-APISERVER = "http://api.danbots.com/api/"
+APISERVER = "http://api.danbots.com/api_1/"
 COMPUTESERVER = "http://compute.danbots.com/api/"
 REGISTERPATH = "register"
 CLOSEPATH = "shutdown"
@@ -44,7 +44,7 @@ INTERFACE = 'wlan0'
 POWER_IDLE = 1.5  # watt
 POWER_WIFI_IDLE = 0.9
 POWER_CAMERA_ACTIVE = 1.5
-SWVERSION = "0.2.0"
+SWVERSION = "0.3.0"
 LOOPING = True
 HWLIB_ENABLE=False
 
@@ -57,7 +57,10 @@ HWLIB_ENABLE=False
 #         mybat = bat.Battery
 #         print (mybat.voltage)
 
-_DEBUG = False
+_DEBUG = True
+
+if _DEBUG:
+    APISERVER = "0.0.0.0:8001/api_1/"
 
 def get_hw_info():
     "Return the raspberry hw string"
@@ -71,10 +74,10 @@ def get_hw_info():
 HW_MODEL = quote_plus(get_hw_info())
 config = configparser.ConfigParser()
 
-def receive_signal(signal_number, frame):
+def receive_signal(signal_number, frame):   # pylint: disable=unused-argument
     "signal handling"
     global LOOPING      # pylint: disable=global-statement
-    logging.warning(f'Received Signal: {signal_number} {frame}')
+    logging.warning(f'Received Signal: {signal_number} {signal.strsignal(signal_number)}')
     LOOPING = False
 
 def save_config():
@@ -109,6 +112,22 @@ def get_charge():
     "return charging dict"
     return {"capacity": 90, "voltage": 3.7, "charging":True}
 
+def create_dictionary(myconfig):
+    "create dict with information to send"
+    rdict = {
+        'apikey': API_KEY,
+        'deviceid': myconfig['device']['deviceid'],
+        'swversion': SWVERSION,
+        'localip': get_ip(),
+        'registerinterval': int(config['server'].get('registerinterval', REGISTERINTERVAL)),
+        'hostname': str(hostname),
+        'hw_model': get_hw_info(),
+        'power': True,
+        'computeserver': config['server'].get('computeserver',COMPUTESERVER),
+        **get_hw_measure()
+    }
+    return rdict
+
 def create_param(ldeviceid, lipaddr, lcharge, lcomputeserver, lregisterinterval, extrainfo=None):   # pylint: disable=too-many-arguments
     "Create url param string"
     #global HW_MODEL, SWVERSION
@@ -125,17 +144,6 @@ def parse_request(data):
     #update = False
     content = json.loads(data)
     print(content)
-    #return
-    # if content.get('apiurl'):
-    #     if config.get('server', 'ApiServer', fallback="") != content.get('apiurl'):
-    #         config['server']['ApiServer'] = content.get('apiurl')
-    #         update = True
-    # commandmode = content.get('commandmode')
-    # if commandmode == "picture":
-    #     print("Starting picture")
-    #     runpy.run_path('/home/danwand/danbots-scanapp/take_pic.py')
-    # if update:
-    #     save_config()
 
 def get_cmd_out(cmd):
     "run command and return output"
@@ -155,19 +163,45 @@ def get_hw_measure():
     return measure
 
 
+def post_request(post_url, jsondata):
+    "Send json data in post request"
+    try:
+        resp = requests.post(post_url, json=jsondata)
+        print(resp)
+    except requests.ConnectionError as ex:
+        log.warning("ConnectionError: " + post_url)
+        log.debug(str(ex))
+        connection_error = True
+        TICK = -1
+        return False
+    except requests.Timeout:
+        log.warning("TimeOut: " + str(ex))
+        return False
+    except requests.exceptions.RequestException as ex:
+        log.warning("RequestException: " + str(ex))
+        return False
+    return True
+    # else:
+    #     connection_error = False
+    #     if r:
+    #         log.info('Register OK')
+    #         log.debug(r.text + str(parse_request(r.text)))
+    #     else:
+    #         log.warning('HTTP error: ' + str(r.status_code))
+    #         log.debug('URL: ' + req_url)
+    # return True
+
 ############  starting #############
 
 
 hostname = os.uname()[1]
-print("DanWand Service Starting on ", hostname)
-
 log = logging.getLogger('danwand-service')
 #log.addHandler(JournalHandler())
 log.addHandler(logging.StreamHandler(sys.stdout))
 log.setLevel(logging.INFO)
 if _DEBUG:
     log.setLevel(logging.DEBUG)
-    print("Setting Debug Level")
+    print(f"Debug {_DEBUG}\n\n")
 log.info(f"DanWand service Starting on {hostname}")
 
 #signal.signal(signal.SIGHUP, receiveSignal)
@@ -194,7 +228,7 @@ if serial:
 
 # check_debug(config)
 
-#get_hw_measure()
+apiserver = APISERVER
 connection_error = False
 TICK = 5
 while LOOPING:
@@ -221,6 +255,11 @@ while LOOPING:
     registerinterval = int(config['server'].get('registerinterval', REGISTERINTERVAL))
     params = create_param(deviceid, ip_addr, quote(json.dumps(charge)), computeserver, registerinterval, extrainfo=hw_state)
     req_url = url + '?' + params
+
+    d = create_dictionary(config)
+    print(url)
+    print(d)
+    post_request(url,d)
     TICK = registerinterval / 5
     log.debug("ReqURL: " + req_url)
     try:
@@ -242,6 +281,8 @@ while LOOPING:
         else:
             log.warning('HTTP error: ' + str(r.status_code))
             log.debug('URL: ' + req_url)
+# closing
+
 log.info(str(datetime.datetime.now()) + " Receive signal - closing")
 
 req_url = apiserver + CLOSEPATH
