@@ -21,23 +21,22 @@ help :
 
 	# @echo "Use the following commands:\n"
 	# @echo "make install\tinstall all required basis sw"
-	# @echo "make debug\tdebug users and console"
-	# @echo "make console\tConfigure console for hdmi and keyboard for DK"
-	# @echo "make ipv6-disable\t,Disable ipv6"
 	# @echo "make website\tinstall website"
 	# @echo "make camera-util\tInstall camera dt-blop"
 	# @echo "make get-sw\tGet other sw to $HOME"
-	# @echo "--"
 	# @echo "make service\tinstall register service"
 	# @echo "make python\tinstall Phython requirements"
 	# @echo "make debugtools\tinstall debug sw"
 
-
-
 # common
 
+pull:
+	git fetch --all
+	git reset --hard
+	
 danwand-config-file:	/home/danwand
 	@echo "create configuration files"
+	cp ./config_files/etc/danwand.conf.org /etc/danwand.conf.org
 	test -f /etc/danwand.conf || cp /etc/danwand.conf.org /etc/danwand.conf
 	chown danwand /etc/danwand.conf
 	chmod a+rw /etc/danwand.conf
@@ -53,13 +52,21 @@ hostname:
 
 # standard services
 
-danwand-services:	danwand-config-file
+
+python-req:
+	@echo "install pip3 and requirements"
+	#apt update
+	#apt -y upgrade
+	apt-get -y install python3-pip
+	apt -y install python3-systemd
+	pip3 install -r requirements.txt
+
+danwand-services:	danwand-config-file python-req
 	@echo Installing danWand Services
 	cp -r ./config_files/systemd/* /etc/systemd/system
 	cp -r ./bin/local/* /usr/local/bin/
 	systemctl enable danwand.service
-
-
+	systemctl restart danwand.service
 
 #config web site
 
@@ -108,9 +115,10 @@ dnsmasq:
 	cp ./config_files/etc/dnsmasq.conf /etc/dnsmasq.d/danwand.conf
 	cp ./config_files/etc/hostapd.conf /etc/hostapd/hostapd.conf
 
+# optimize apache config
 apache:
 	@echo "Installing Apache Webserver"
-	apt -y install apache2 php libapache2-mod-php
+	#apt -y install apache2 php libapache2-mod-php
 	sed -i /etc/apache2/mods-available/mpm_prefork.conf -e "/[StartServers|MinSpareServers]/s/5/3/"
 	# allow apache to use camera and exec sudo
 	usermod -aG video www-data
@@ -121,10 +129,10 @@ system-access:
 	cp ./config_files/user/authorized_keys.danwand /home/pi/.ssh/authorized_keys
 	cp ./config_files/user/authorized_keys.danwand /etc/ssh/ssh_known_hosts
 
-/var/lib/danwand/install-system: raspbian-config std-sw raspi-boot-config hostapd dnsmasq apache console system-access
-	@echo standard systemfiles Installed
-	mkdir -p /var/lib/danwand
-	touch /var/lib/danwand/install-system
+# /var/lib/danwand/install-system: raspbian-config std-sw raspi-boot-config hostapd dnsmasq apache console system-access
+# 	@echo standard systemfiles Installed
+# 	mkdir -p /var/lib/danwand
+# 	touch /var/lib/danwand/install-system
 
 install-system:	/var/lib/danwand/install-system user-peter
 	@echo System files Installed
@@ -193,5 +201,5 @@ get-sw:
 # 	@echo "All SW Installed"
 
 #install: website 
-install: 	danwand-services
+install: apache website danwand-services
 	@echo "All SW Installed"

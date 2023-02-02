@@ -11,7 +11,7 @@ StartLimitIntervalSec=30
 [Service]
 Type=idle
 Restart=always
-RestartSec=10
+RestartSec=30
 User=danwand
 Environment=PYTHONUNBUFFERED=1
 StandardOutput=journal

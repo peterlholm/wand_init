@@ -167,7 +167,7 @@ def post_request(post_url, jsondata):
     "Send json data in post request"
     try:
         resp = requests.post(post_url, json=jsondata)
-        print(resp)
+        #print(resp)
     except requests.ConnectionError as ex:
         log.warning("ConnectionError: " + post_url)
         log.debug(str(ex))
@@ -180,6 +180,11 @@ def post_request(post_url, jsondata):
     except requests.exceptions.RequestException as ex:
         log.warning("RequestException: " + str(ex))
         return False
+    if not resp:
+        log.warning("ResponseCode: " + str(resp.status_code))
+        #log.warning("Response: " + resp.text)
+        return False
+    #log.debug(resp.text)
     return True
     # else:
     #     connection_error = False
@@ -199,10 +204,10 @@ log = logging.getLogger('danwand-service')
 #log.addHandler(JournalHandler())
 log.addHandler(logging.StreamHandler(sys.stdout))
 log.setLevel(logging.INFO)
+log.info(f"DanWand service Starting on {hostname}")
 if _DEBUG:
     log.setLevel(logging.DEBUG)
     print(f"Debug {_DEBUG}\n\n")
-log.info(f"DanWand service Starting on {hostname}")
 
 #signal.signal(signal.SIGHUP, receiveSignal)
 signal.signal(signal.SIGTERM, receive_signal)
@@ -255,10 +260,8 @@ while LOOPING:
     registerinterval = int(config['server'].get('registerinterval', REGISTERINTERVAL))
     params = create_param(deviceid, ip_addr, quote(json.dumps(charge)), computeserver, registerinterval, extrainfo=hw_state)
     req_url = url + '?' + params
-
     d = create_dictionary(config)
-    print(url)
-    print(d)
+    log.debug(str(url) + str(d))
     post_request(url,d)
     TICK = registerinterval / 5
     log.debug("ReqURL: " + req_url)
