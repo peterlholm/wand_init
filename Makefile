@@ -38,7 +38,7 @@ help :
 
 danwand-config-file:	/home/danwand
 	@echo "create configuration files"
-	test -f /etc/danwand.conf || touch /etc/danwand.conf
+	test -f /etc/danwand.conf || cp /etc/danwand.conf.org /etc/danwand.conf
 	chown danwand /etc/danwand.conf
 	chmod a+rw /etc/danwand.conf
 

@@ -10,6 +10,13 @@
   <link rel="icon" href="db_logo_icon.png" type="image/png">
   <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
   <link rel="stylesheet" type="text/css" href="/css/site.css" />
+
+<style>
+  .disable_meter {
+    opacity: 0.3;
+  }
+</style>
+
 </head>
 
 <body>
@@ -24,6 +31,7 @@
     $ssid = wifi_ssid();
     if ($ssid=='') $ssid = "DanWand";
     $power = battery_power_level();
+    $power = 0;
     $signal = wifi_signal_level();
     if ($signal=="") $hidesignal="d-none";
     $internet = internet_connection()?"OK":"Error";
@@ -32,10 +40,10 @@
     $charging ="";
     ?>
     <script>
-    var element = document.getElementById("home");
-    element.classList.add("active");
-  </script>
- 
+      var element = document.getElementById("home");
+      element.classList.add("active");
+    </script>
+
     <div class="background-wand">
       <br>
       <h1 class="text-center">danWand configuration</h1>
@@ -77,7 +85,10 @@
           <label>WiFi Level</label>
         </div>
         <div class="col-4">
-        <meter value="<?=$signal?>" min="-80" max="-40" low="-70" high="-60" optimum="-65" title="<?=$signal?> dBm"><?=$signal?> dBm</meter> <?=$signal?> dBm
+          <meter value="<?=$signal?>" min="-80" low="-70" high="-50" optimum="-45" max="-40" title="<?=$signal?> dBm">
+            <?=$signal?> dBm
+          </meter>
+          <?=$signal?> dBm
         </div>
       </div>
       <div class="row justify-content-center">
@@ -107,12 +118,20 @@
       </div>
       <div class="row justify-content-center">
         <div class="col-4">
-          <label>Power Level</label>
+          <label>Power</label>
         </div>
         <div class="col-4">
-        <meter value="<?=$power?>" min="0" max="100" low="25" high="80" optimum="85" title="Charge <?=$power?>%"><?=$power?>%</meter> 
-        <img src="pic/lightning.png" class="<?=$charging?>" height=20/>
-        
+          <img src="pic/lightning.png" class="<?=$charging?>" height=20 />
+        </div>
+      </div>
+      <div class="row justify-content-center disable_meter">
+        <div class="col-4">
+          <label>Battery Level</label>
+        </div>
+        <div class="col-4">
+          <meter class="disab" disable value="<?=$power?>" min="0" max="100" low="25" high="80" optimum="85" title="Charge <?=$power?>%">
+            <?=$power?>%
+          </meter>
         </div>
       </div>
 

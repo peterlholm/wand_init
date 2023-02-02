@@ -23,11 +23,50 @@
       var element = document.getElementById("advanced");
       element.classList.add("active");
     </script>
+    <?php
+    if (isset(($_REQUEST['submit']))) {
+      $function = $_REQUEST['submit'];
+      if ($function == "hostname") {
+        $hostname = $_REQUEST['hostname'];
+        echo "<h4>Setting new hostname  $hostname </h4><br>";
+        change_host_name($hostname);
+      }
+      if ($function == "resetconfiguration") {
+        echo "<h4>Resetting Configuration</h4><br>";
+        reset_danwand_config();
+      }
+    }
+      
+    ?>
+
     <br>
     <div class="">
-      Model: <?=get_hw_info()?>
-      <br>
       <form>
+        Model:
+        <?=get_hw_info()?>
+        <hr>
+        <br>
+        <div class="row">
+          <div class="col-sm-3">
+            <label for="hostname">HostName</label>
+          </div>
+          <div class="col-sm-3">
+              <input type="text" id="hostname" name="hostname">
+            </div>
+          <div class="col-sm-3">
+                <button type="submit" class="btn btn-primary" name="submit" value="hostname">Change</button>
+          </div>
+        </div>
+        <br>
+        <div class="row">
+          <div class="col-sm-3">
+            <label for="hostname">Reset danWand Configuration</label>
+          </div>
+          <div class="col-sm-3">
+            <button type="submit" class="btn btn-primary" name="submit" value="resetconfiguration">Reset Configuration</button>
+          </div>
+        </div>
+        <hr>
         <h3 class='text-center'>Advanced 1</h3>
         <hr>
         <h3 class='text-center'>Special Functions</h3>
@@ -38,9 +77,9 @@
           <div class="col-sm-3">
             <button type="submit" class="btn btn-primary" name="submit" value="resetconfig">Reset Configmode</button>
           </div>
-          </div>
-          <br>
-          <div class="row">
+        </div>
+        <br>
+        <div class="row">
           <div class="col-sm-3">
             <button type="submit" class="btn btn-primary" name="submit" value="reboot">Reboot to normal</button>
           </div>
@@ -51,9 +90,9 @@
             <button type="submit" class="btn btn-primary" name="submit" value="halt">Halt</button>
           </div>
         </div>
-      </form>
-    </div>
-    <?php
+    </form>
+  </div>
+  <?php
     $configfile = "/var/lib/danwand/configmode";
     if (isset(($_REQUEST['submit']))) {
       $function = $_REQUEST['submit'];

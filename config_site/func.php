@@ -123,3 +123,28 @@ function get_wifi_status()
     //print_r($output);
     return "<pre>" . implode("\n", $output) . "</pre>";
 }
+
+function change_host_name($name)
+{
+    echo "Changing hostname to $name <br>";
+    if (strlen($name)<3) {
+        echo "<h1>Hostname $name to short</h1>";
+        return false;
+    }
+    $r  = exec("hostnamectl set-hostname $name", $out, $res);
+    echo "result: $res $r <br>";
+    # the folowwing line contains tabs
+    $str = "/127.0.1.1/s/127.0.1.1.*/127.0.1.1	"."$name/";
+    $cmd = "sed -i /etc/hosts -e '" . $str . "'";
+    echo $cmd . "<br>";
+    $r = exec($cmd, $out, $res);
+	echo "result: $res $r <br>";
+    #print_r($out);
+}
+
+function reset_danwand_config()
+{
+    echo "Reseting danWand Config<br>";
+	$r  = exec("cp /etc/danwand.conf.org /etc/danwand.conf", $out, $res);
+    echo "result: $res $r <br>";
+}

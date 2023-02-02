@@ -1,0 +1,3 @@
+[server]
+apiserver = http://api.danbots.com/api/
+computeserver = http://compute.danbots.com/api
