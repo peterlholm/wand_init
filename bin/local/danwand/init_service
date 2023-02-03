@@ -9,15 +9,16 @@
 # If no connection switch to config mode
 #
 
-# pylint: disable=logging-not-lazy
+# pylint: disable=logging-not-lazy, logging-fstring-interpolation
+
 import os
 import platform
 import sys
-import datetime
+#import datetime
 import time
 import subprocess
 import logging
-from systemd.journal import JournalHandler
+#from systemd.journal import JournalHandler
 
 #from pathlib import Path
 
@@ -28,6 +29,7 @@ DANBOTS_HOST = "live.danbots.com"
 START_COUNTER = 6       #  6 minutes (10 sec)
 SERVICE_COUNTER = 3         # minutes
 INITIAL_SLEEP_TIME = 60 # seconds
+
 _DEVEL = False
 _DEBUG = True
 _SIMLED = True
@@ -113,10 +115,11 @@ if len(sys.argv)>1:
     if sys.argv[1] == "-d":
         print("Setting Debug")
         _DEBUG = True
-        REBOOT = False
 
-log = logging.getLogger(__name__)
-log.addHandler(JournalHandler())
+hostname = os.uname()[1]
+log = logging.getLogger("dw_init")
+#log.addHandler(JournalHandler())
+log.addHandler(logging.StreamHandler(sys.stdout))
 #logging.basicConfig(filename='example.log', encoding='utf-8', level=logging.DEBUG)
 if _DEBUG:
     #create formatter
@@ -127,7 +130,8 @@ if _DEBUG:
     log.addHandler(fh)
 
 log.setLevel(logging.INFO)
-log.info("wand init service starting")
+log.info(f"DanWand INIT service Starting on {hostname}")
+
 
 starttime = time.time()
 COUNTER = 0
@@ -156,7 +160,7 @@ log.info("Going to normal Checks " + str(RUNNING))
 
 set_normal_check_state()
 
-log.info("Wand connected")
+#log.info("Wand connected")
 COUNTER = 0
 while RUNNING:
     CONNECTED = check_connections()
@@ -165,15 +169,13 @@ while RUNNING:
         COUNTER = 0
     else:
         COUNTER +=1
-        log.debug("bad connection: "+str(COUNTER))
+        log.debug("bad connection: " + str(COUNTER) + "/" +
+                  str(SERVICE_COUNTER))
     if COUNTER > SERVICE_COUNTER:
         RUNNING=False
     time.sleep(60)
 
 log.warning("Going to Config mode")
-if REBOOT:
-    log.debug("Goto config.target")
-    subprocess.run('sudo systemctl --message="Config rebooting" isolate config.target', shell=True, check=False)
 set_config_mode()
 subprocess.run('sudo systemctl --message="Config rebooting" isolate config.target', shell=True, check=False)
-log.info(datetime.datetime.now(), "Config.service ending")
+log.info("INIT.service ending")

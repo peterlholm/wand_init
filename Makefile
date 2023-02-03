@@ -124,16 +124,6 @@ apache:
 	usermod -aG video www-data
 	usermod -aG sudo www-data
 
-system-access:
-	mkdir -p /home/pi/.ssh
-	cp ./config_files/user/authorized_keys.danwand /home/pi/.ssh/authorized_keys
-	cp ./config_files/user/authorized_keys.danwand /etc/ssh/ssh_known_hosts
-
-# /var/lib/danwand/install-system: raspbian-config std-sw raspi-boot-config hostapd dnsmasq apache console system-access
-# 	@echo standard systemfiles Installed
-# 	mkdir -p /var/lib/danwand
-# 	touch /var/lib/danwand/install-system
-
 install-system:	/var/lib/danwand/install-system user-peter
 	@echo System files Installed
 
@@ -147,13 +137,6 @@ install-system:	/var/lib/danwand/install-system user-peter
 # 	#systemctl stop apache2
 # 	a2dissite 000-default
 # 	systemctl restart apache2
-
-	
-
-danwand-lib:  /home/danwand
-	mkdir -p /var/lib/danwand 
-	chown danwand:www-data /var/lib/danwand
-	chmod ug+rw /var/lib/danwand
 
 /home/danwand:
 	@echo generating danwand user
@@ -201,5 +184,5 @@ get-sw:
 # 	@echo "All SW Installed"
 
 #install: website 
-install: apache website danwand-services
+install: apache website danwand-services configmode
 	@echo "All SW Installed"
