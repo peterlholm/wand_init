@@ -1,6 +1,7 @@
 <?php
 
 //  220428  PLH First version
+$debug = 0;
 
 $windows = 0;
 if (PHP_OS == 'WINNT') {
@@ -131,20 +132,24 @@ function change_host_name($name)
         echo "<h1>Hostname $name to short</h1>";
         return false;
     }
-    $r  = exec("hostnamectl set-hostname $name", $out, $res);
-    echo "result: $res $r <br>";
+    $r  = exec("sudo hostnamectl set-hostname $name", $out, $res);
+    if ($debug) {
+        echo "result: $res $r <br>";
+    }
     # the folowwing line contains tabs
     $str = "/127.0.1.1/s/127.0.1.1.*/127.0.1.1	"."$name/";
-    $cmd = "sed -i /etc/hosts -e '" . $str . "'";
-    echo $cmd . "<br>";
+    $cmd = "sudo sed -i /etc/hosts -e '" . $str . "'";
     $r = exec($cmd, $out, $res);
-	echo "result: $res $r <br>";
+    if ($debug) {
+        echo $cmd . "<br>";
+	    echo "result: $res $r <br>";
+    }
     #print_r($out);
 }
 
 function reset_danwand_config()
 {
     echo "Reseting danWand Config<br>";
-	$r  = exec("cp /etc/danwand.conf.org /etc/danwand.conf", $out, $res);
+	$r  = exec("sudo cp /etc/danwand.conf.org /etc/danwand.conf", $out, $res);
     echo "result: $res $r <br>";
 }

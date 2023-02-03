@@ -35,10 +35,16 @@
         echo "<h4>Resetting Configuration</h4><br>";
         reset_danwand_config();
       }
+      if ($function == "reboot") {
+        echo "<h4>Rebooting System</h4><br>";
+        system_set_mode('reboot');
+      }
+      if ($function == "halt") {
+        echo "<h4>System Closing</h4><br>";
+        system_set_mode('halt');
+      }
     }
-      
     ?>
-
     <br>
     <div class="">
       <form>
@@ -66,6 +72,25 @@
             <button type="submit" class="btn btn-primary" name="submit" value="resetconfiguration">Reset Configuration</button>
           </div>
         </div>
+        <br>
+        <div class="row">
+          <div class="col-sm-3">
+            <label for="hostname">Reboot System</label>
+          </div>
+          <div class="col-sm-3">
+            <button type="submit" class="btn btn-primary" name="submit" value="reboot">Reboot System</button>
+          </div>
+        </div>
+        <br>
+        <div class="row">
+          <div class="col-sm-3">
+            <label for="hostname">Halt System</label>
+          </div>
+          <div class="col-sm-3">
+            <button type="submit" class="btn btn-primary" name="submit" value="halt">Halt System</button>
+          </div>
+        </div>
+
         <hr>
         <h3 class='text-center'>Advanced 1</h3>
         <hr>
@@ -80,9 +105,6 @@
         </div>
         <br>
         <div class="row">
-          <div class="col-sm-3">
-            <button type="submit" class="btn btn-primary" name="submit" value="reboot">Reboot to normal</button>
-          </div>
           <div class="col-sm-3">
             <button type="submit" class="btn btn-primary" name="submit" value="config">Reboot to Config Mode</button>
           </div>
@@ -104,18 +126,18 @@
         unlink($configfile);
         echo "<h4>deleting config mode</h4><br>";
       }
-      if ($function == "reboot") {
-        system_set_mode("reboot");
-        echo "<h4>System rebooting</h4><br>";
-      }
+      // if ($function == "reboot") {
+      //   system_set_mode("reboot");
+      //   echo "<h4>System rebooting</h4><br>";
+      // }
       if ($function == "config") {
         system_set_mode("config");
         echo "<h4>System rebooting to config mode</h4><br>";
       }
-      if ($function == "halt") {
-        system_set_mode("halt");
-        echo "<h4>System Shutdown</h4><br>";
-      }
+      // if ($function == "halt") {
+      //   system_set_mode("halt");
+      //   echo "<h4>System Shutdown</h4><br>";
+      // }
     }
     ?>
   </div>
