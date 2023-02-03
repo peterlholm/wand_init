@@ -8,6 +8,7 @@ CONFDIR=conf
 #HOME=/home/danwand
 BACKUPDIR=$(HOME)/backupconf
 WEBSITEDIR=/var/www/danwand
+OS_SW_LIST='hostapd '
 
 default:
 	@echo "install the wand basis services"
@@ -33,6 +34,13 @@ help :
 pull:
 	git fetch --all
 	git reset --hard
+
+check_sw:
+	@echo "Updaten used sw"
+	apt update
+	apt --only-upgrade install $(OS_SW_LIST)
+
+	
 	
 danwand-config-file:	/home/danwand
 	@echo "create configuration files"
