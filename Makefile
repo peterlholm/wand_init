@@ -40,7 +40,9 @@ check_sw:
 	apt update
 	apt --only-upgrade install $(OS_SW_LIST)
 
-	
+close_unwanted_services:
+	systemctl disable apt-daily-upgrade.service
+	systemctl disable apt-daily.service
 	
 danwand-config-file:	/home/danwand
 	@echo "create configuration files"
