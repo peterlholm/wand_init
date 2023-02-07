@@ -115,6 +115,34 @@ function add_wpa_config($ssid, $passphrase)
     return;
 }
 
+function get_wifi_config_list()
+{
+    $cmd = "wpa_cli list_networks";
+    $res = exec($cmd, $out, $result);
+    echo "res: " . $res . ' result: '. $result;
+    print_r($out);
+    for ($i=2; $i<count($out); $i++) {
+        echo $out[$i];
+        $val = explode(' ', $out[$i]);
+    }
+}
+
+function remove_wifi_ssid($name) {
+    $cmd = "wpa_cli list_networks";
+    $res = exec($cmd, $out, $result);
+    echo "res: " . $res . ' result: '. $result;
+    print_r($out);
+    for ($i=2; $i<count($out); $i++) {  
+        echo "Line: ".$out[$i];
+        $val = explode("\t", $out[$i]);
+        print_r($val);
+        if ($val[1]==$name) {
+            $cmd = "wpa_cli remove_network $val[0]";
+            echo "Removing " . $cmd;
+        }
+    }
+}
+
 function get_wifi_status()
 {
     unset($output);
@@ -153,3 +181,8 @@ function reset_danwand_config()
 	$r  = exec("sudo cp /etc/danwand.conf.org /etc/danwand.conf", $out, $res);
     echo "result: $res $r <br>";
 }
+
+
+// get_wifi_config_list();
+
+// remove_wifi_ssid("dummy");
