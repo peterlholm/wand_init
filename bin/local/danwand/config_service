@@ -14,7 +14,7 @@ import datetime
 import time
 import subprocess
 from pathlib import Path
-from gpiozero import LED
+from gpiozero import LED    # pylint: disable=import-error
 
 # pylint: disable=missing-module-docstring
 
@@ -69,5 +69,5 @@ else:
     print(datetime.datetime.now(), "Rebooting system")
     subprocess.run('sudo systemctl --message="Config rebooting" reboot', shell=True, check=False)
 
-print(datetime.datetime.now(), "Config.service ending")
 dias.off()
+print(datetime.datetime.now(), "Config.service ending")

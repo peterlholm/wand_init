@@ -204,7 +204,7 @@ log = logging.getLogger('danwand-service')
 #log.addHandler(JournalHandler())
 log.addHandler(logging.StreamHandler(sys.stdout))
 log.setLevel(logging.INFO)
-log.info(f"DanWand service Starting on {hostname}")
+log.warning(f"DanWand service Starting on {hostname}")
 if _DEBUG:
     log.setLevel(logging.DEBUG)
     print(f"Debug {_DEBUG}\n\n")
@@ -215,6 +215,7 @@ signal.signal(signal.SIGINT, receive_signal)
 
 serial = get_serial()
 if serial:
+    print("Serial", serial)
     if not Path(CONFIGFILE).exists():
         log.warning(str(CONFIGFILE) + " does not exist")
         Path(CONFIGFILE).touch(mode=777)
@@ -222,11 +223,14 @@ if serial:
         config.read_file(fd)
     if not config.has_section('device'):
         config.add_section('device')
+        log.info("Adding device section")
     if serial != config['device'].get('deviceid'):
+        
         log.info("Saving serial "+str(serial) + "on " + config['device'].get('deviceid'))
         config['device']['deviceid'] = serial
         save_config()
     if not config.has_section('server'):
+        log.info("adding server section")
         config.add_section('server')
         config['server']['apiserver'] = APISERVER
         config['server']['computeserver'] = COMPUTESERVER

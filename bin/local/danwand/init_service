@@ -130,7 +130,7 @@ if _DEBUG:
     log.addHandler(fh)
 
 log.setLevel(logging.INFO)
-log.info(f"DanWand INIT service Starting on {hostname}")
+log.warning(f"DanWand INIT service Starting on {hostname}")
 
 
 starttime = time.time()

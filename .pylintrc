@@ -5,11 +5,9 @@ extension-pkg-allow-list=netifaces
 [MESSAGES CONTROL]
 enable=W,E,R,F,C
 
-disable=C0114,
-        missing-module-docstring,
+disable=missing-module-docstring,
         missing-class-docstring,
         line-too-long
-        # xmissing-function-docstring
         
 [BASIC]
 
