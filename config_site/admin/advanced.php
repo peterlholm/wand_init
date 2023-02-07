@@ -108,9 +108,6 @@
           <div class="col-sm-3">
             <button type="submit" class="btn btn-primary" name="submit" value="config">Reboot to Config Mode</button>
           </div>
-          <div class="col-sm-3">
-            <button type="submit" class="btn btn-primary" name="submit" value="halt">Halt</button>
-          </div>
         </div>
     </form>
   </div>

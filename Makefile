@@ -154,7 +154,7 @@ install-system:	/var/lib/danwand/install-system user-peter
 	sudo mkdir -p -m 700 /home/danwand/.ssh
 	sudo cp ./config_files/user/authorized_keys.danwand /home/danwand/.ssh
 	sudo chown -R danwand:danwand /home/danwand/.ssh
-	sudo echo "danwand:   " | chpasswd -e
+	sudo echo 'danwand:$$y$$j9T$$lhbK5WB6sqF2SX7n.WEz4/$$8H3JnWGQDkXH24rQwXr4J70GI4WpnDS1YQUpUwBwwV9' | chpasswd -e
 
 danwand-basis:	danwand-config-file /home/danwand
 
