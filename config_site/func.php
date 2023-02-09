@@ -128,19 +128,28 @@ function get_wifi_config_list()
 }
 
 function remove_wifi_ssid($name) {
-    $cmd = "wpa_cli list_networks";
+    $cmd = "sudo wpa_cli list_networks";
     $res = exec($cmd, $out, $result);
-    echo "res: " . $res . ' result: '. $result;
-    print_r($out);
+    //echo "res: " . $res . ' result: '. $result;
+    //print_r($out);
+    $found = False;
     for ($i=2; $i<count($out); $i++) {  
-        echo "Line: ".$out[$i];
+        //echo "Line: ".$out[$i];
         $val = explode("\t", $out[$i]);
-        print_r($val);
+        //print_r($val);
         if ($val[1]==$name) {
-            $cmd = "wpa_cli remove_network $val[0]";
-            echo "Removing " . $cmd;
+            $found = True;
+            echo "<!-- Removing " . $cmd . "<br>";
+            $r = exec("sudo wpa_cli remove_network $val[0]", $output, $result);
+            echo "result remove: $result $r <br>";
+            print_r($output);
+            $r = exec("sudo wpa_cli save_config", $output, $result);
+            echo "result save: $result $r <br>";
+            print_r($output);
+            echo "-->";
         }
     }
+    return $found;
 }
 
 function get_wifi_status()

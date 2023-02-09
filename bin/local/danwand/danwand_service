@@ -225,8 +225,7 @@ if serial:
         config.add_section('device')
         log.info("Adding device section")
     if serial != config['device'].get('deviceid'):
-        
-        log.info("Saving serial "+str(serial) + "on " + config['device'].get('deviceid'))
+        log.info("Saving serial "+str(serial) + "on " + str(config['device'].get('deviceid')))
         config['device']['deviceid'] = serial
         save_config()
     if not config.has_section('server'):

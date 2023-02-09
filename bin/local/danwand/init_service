@@ -52,6 +52,7 @@ def set_normal_check_state():
         dias.off()
 
 def set_config_mode():
+    "Move to config mode"
     log.debug("Going to config mode")
     if not _SIMLED:
         flash.on()

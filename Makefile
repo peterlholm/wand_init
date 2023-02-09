@@ -43,7 +43,7 @@ check_sw:
 close_unwanted_services:
 	systemctl disable apt-daily-upgrade.service
 	systemctl disable apt-daily.service
-	
+
 danwand-config-file:	/home/danwand
 	@echo "create configuration files"
 	cp ./config_files/etc/danwand.conf.org /etc/danwand.conf.org

@@ -1,3 +1,6 @@
+<?php
+//$admin = "disabled";
+?>
 <nav class="navbar navbar-expand-md navbar-dark xbg-primary">
     <a class="navbar-brand" href="/">
         <img src="/pic/db_logo.png" width="30" height="30" class="d-inline-block align-top" alt="logo">
@@ -13,21 +16,21 @@
                 <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
             </li>
             <li class="nav-item" id="wifi">
-                <a class="nav-link" href="/admin/wifi.php">WiFi Configuration</a>
+                <a class="nav-link <?=$admin;?>" href="/admin/wifi.php">WiFi Configuration</a>
             </li>
             <li class="nav-item" id="advanced">
-                <a class="nav-link" href="/admin/advanced.php">Advanced</a>
+                <a class="nav-link <?=$admin;?>" href="/admin/advanced.php">Advanced</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link disabled" href="#">Change password</a>
             </li>
             <li class="nav-item" id="debug">
-                <a class="nav-link" href="/debug/">Debug</a>
+                <a class="nav-link <?=$admin;?>" href="/debug/">Debug</a>
             </li>
         </ul>
         <ul class="navbar-nav">
             <li class="nav-item" id="login">
-                <a class="nav-link" href="/admin/login">Login</a>
+                <a class="nav-link" href="/admin/wifi.php">Login</a>
             </li>
         </ul>
     </div>

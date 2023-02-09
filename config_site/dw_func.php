@@ -61,6 +61,7 @@ function system_set_mode($val = "")
             break;
         case "restart":
             $cmd = "sudo shutdown -r now";
+            $cmd = "sudo systemctl reboot";
             break;
         case "shutdown":
             $cmd = "sudo shutdown -h now";
