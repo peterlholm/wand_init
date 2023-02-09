@@ -184,13 +184,6 @@ function change_host_name($name)
     #print_r($out);
 }
 
-function reset_danwand_config()
-{
-    echo "Reseting danWand Config<br>";
-	$r  = exec("sudo cp /etc/danwand.conf.org /etc/danwand.conf", $out, $res);
-    echo "result: $res $r <br>";
-}
-
 
 // get_wifi_config_list();
 

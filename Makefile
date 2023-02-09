@@ -18,7 +18,7 @@ default:
 
 help :
 	@echo "make hostname\tset new wand hostname"	
-	@echo 
+	@echo "make reset_config\t reset configuration"
 
 	# @echo "Use the following commands:\n"
 	# @echo "make install\tinstall all required basis sw"
@@ -59,6 +59,12 @@ hostname:
 	sed -i /etc/hosts -e '/127.0.1.1/s/127.0.1.1\t.*/127.0.1.1\twand/'
 	@echo hostname changed after reboot
 	#raspi-config nonint do_hostname wand
+
+
+reset_config:
+	@echo "Reset to standard config files (danwand, wpa_suplicant")
+	cp ./config_files/etc/danwand.conf.org /etc/danwand.conf
+	cp ./config_files/etc/wpa_supplicant.conf /etc/wpa_supplicant/wpa_suplicant.conf
 
 # standard services
 
@@ -160,9 +166,11 @@ install-system:	/var/lib/danwand/install-system user-peter
 
 danwand-basis:	danwand-config-file /home/danwand
 
+wpa-config:
+	cp ./config_files/etc/wpa_supplicant.conf /etc/wpa_supplicant/wpa_suplicant.conf.org
 
 #
-configmode:	danwand-config-file danwand-services python-req
+configmode:	danwand-config-file danwand-services python-req wpa-config
 	@echo "Installing Configmode files"
 	apt install avahi-utils
 	cp ./config_files/etc/dw_dhcpcd.conf /etc
