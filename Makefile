@@ -167,9 +167,8 @@ install-system:	/var/lib/danwand/install-system user-peter
 danwand-basis:	danwand-config-file /home/danwand
 
 wpa-config:
-	cp ./config_files/etc/wpa_supplicant.conf /etc/wpa_supplicant/wpa_suplicant.conf.org
+	cp ./config_files/etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_suplicant.conf.org
 
-#
 configmode:	danwand-config-file danwand-services python-req wpa-config
 	@echo "Installing Configmode files"
 	apt install avahi-utils

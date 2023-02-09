@@ -26,6 +26,7 @@ from urllib.parse import quote, quote_plus
 import configparser
 import netifaces as ni
 import requests
+from systemd import journal
 
 sys.path.insert(0,'/usr/local/danwand/lib')
 
@@ -201,7 +202,7 @@ def post_request(post_url, jsondata):
 
 hostname = os.uname()[1]
 log = logging.getLogger('danwand-service')
-#log.addHandler(JournalHandler())
+log.addHandler(journal.JournalHandler())
 log.addHandler(logging.StreamHandler(sys.stdout))
 log.setLevel(logging.INFO)
 log.error("Error test")
