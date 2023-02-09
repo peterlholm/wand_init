@@ -204,6 +204,7 @@ log = logging.getLogger('danwand-service')
 #log.addHandler(JournalHandler())
 log.addHandler(logging.StreamHandler(sys.stdout))
 log.setLevel(logging.INFO)
+log.error("Error test")
 log.warning(f"DanWand service Starting on {hostname}")
 if _DEBUG:
     log.setLevel(logging.DEBUG)

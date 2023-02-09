@@ -130,6 +130,7 @@ if _DEBUG:
     fh.setFormatter(formatter)
     log.addHandler(fh)
 
+log.error("Test")
 log.setLevel(logging.INFO)
 log.warning(f"DanWand INIT service Starting on {hostname}")
 
