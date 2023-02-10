@@ -22,7 +22,7 @@ import datetime
 import signal
 import logging
 import json
-from urllib.parse import quote, quote_plus
+from urllib.parse import quote_plus # quote
 import configparser
 import netifaces as ni
 import requests
@@ -46,6 +46,9 @@ POWER_IDLE = 1.5  # watt
 POWER_WIFI_IDLE = 0.9
 POWER_CAMERA_ACTIVE = 1.5
 SWVERSION = "0.3.0"
+MAX_TEMP = 58.0
+MIN_VOLTAGE = 0.8
+
 LOOPING = True
 HWLIB_ENABLE=False
 
@@ -58,10 +61,7 @@ HWLIB_ENABLE=False
 #         mybat = bat.Battery
 #         print (mybat.voltage)
 
-_DEBUG = False
-
-# if _DEBUG:
-#     APISERVER = "0.0.0.0:8001/api_1/"
+_DEBUG = True
 
 def get_hw_info():
     "Return the raspberry hw string"
@@ -133,7 +133,7 @@ def create_param(ldeviceid, lipaddr, lcharge, lcomputeserver, lregisterinterval,
     "Create url param string"
     #global HW_MODEL, SWVERSION
     param = "apikey=" + API_KEY + "&deviceid=" + ldeviceid + "&hwmodel=" + HW_MODEL + \
-            "&swversion=" + SWVERSION + "&localip=" + lipaddr + "&chargestate=" + quote_plus(str(lcharge)) + \
+            "&swvercodesion=" + SWVERSION + "&localip=" + lipaddr + "&chargestate=" + quote_plus(str(lcharge)) + \
             "&computeserver=" + quote_plus(lcomputeserver) + \
             "&registerinterval=" + str(lregisterinterval) + \
             "&hostname=" + str(hostname)
@@ -160,6 +160,12 @@ def get_hw_measure():
         volt = float(get_cmd_out(cmd2))
     except ValueError:
         temp = volt = 0
+    if temp > MAX_TEMP:
+        log.warning(f"Temperature: {temp}")
+        send_event("High temperature: {temp}")
+    if volt < MIN_VOLTAGE:
+        log.error(f"Low voltage: {volt}")
+        send_event("Low Volatage:  {volt}", level="Error")
     measure = {"temp": temp, "cpu_voltage": volt}
     return measure
 
@@ -170,19 +176,19 @@ def post_request(post_url, jsondata):
         resp = requests.post(post_url, json=jsondata)
         #print(resp)
     except requests.ConnectionError as excp:
-        log.warning("ConnectionError: " + post_url)
+        log.warning("post_request ConnectionError: " + post_url)
         log.debug(str(excp))
         #connection_error = True
         #TICK = -1
         return False
     except requests.Timeout as excp:
-        log.warning("TimeOut: " + str(excp))
+        log.warning("post_request TimeOut: " + str(excp)+ post_url)
         return False
     except requests.exceptions.RequestException as excp:
-        log.warning("RequestException: " + str(excp))
+        log.warning("post_request RequestException: " + str(excp))
         return False
     if not resp:
-        log.warning("ResponseCode: " + str(resp.status_code))
+        log.warning("post_request ResponseCode: " + str(resp.status_code) + post_url)
         #log.warning("Response: " + resp.text)
         return False
     #log.debug(resp.text)
@@ -197,6 +203,15 @@ def post_request(post_url, jsondata):
     #         log.debug('URL: ' + req_url)
     # return True
 
+def send_event(data, level='Info'):
+    "Send eventjson data in post request"
+    event = {'deviceid': deviceid, 'level': level, 'event': data }
+    print(url)
+    if lastreg:
+        resp = post_request(url+"/event", event)
+        if not resp:
+            log.warning(f"Error sending event: {resp.status_code}")
+
 ############  starting #############
 
 
@@ -204,9 +219,8 @@ hostname = os.uname()[1]
 log = logging.getLogger('danwand-service')
 log.addHandler(journal.JournalHandler())
 #log.addHandler(logging.StreamHandler(sys.stdout))
-log.setLevel(logging.INFO)
-log.error("Error test")
-log.warning(f"DanWand service Starting on {hostname}")
+log.setLevel(logging.DEBUG)
+log.info(f"DanWand service Starting on {hostname}")
 if _DEBUG:
     log.setLevel(logging.DEBUG)
     print(f"Debug {_DEBUG}\n\n")
@@ -217,7 +231,6 @@ signal.signal(signal.SIGINT, receive_signal)
 
 serial = get_serial()
 if serial:
-    print("Serial", serial)
     if not Path(CONFIGFILE).exists():
         log.warning(str(CONFIGFILE) + " does not exist")
         Path(CONFIGFILE).touch(mode=777)
@@ -238,6 +251,8 @@ if serial:
         config['server']['registerinterval'] = str(REGISTERINTERVAL)
         save_config()
 
+deviceid = config['device']['deviceid']
+
 # check_debug(config)
 
 apiserver = APISERVER
@@ -256,21 +271,22 @@ while LOOPING:
     if config['server'].get('debug'):
         print("Debug: True")
         _DEBUG = config['server'].get('debug')
-    log.debug('Sections: ' + str(config.sections()))
+    #log.debug('Sections: ' + str(config.sections()))
     if connection_error:
         apiserver = APISERVER
     else:
         apiserver = config['server'].get('apiserver',APISERVER)
+    log.debug("API server: "+ apiserver)
     url = create_url(apiserver)
     deviceid = config['device']['deviceid']
     ip_addr = get_ip()
-    charge = get_charge()
+    #charge = get_charge()
     hwstate = get_hw_info()
-    hw_state = get_hw_measure()
+    #hw_state = get_hw_measure()
     computeserver = config['server'].get('computeserver',"")
     registerinterval = int(config['server'].get('registerinterval', REGISTERINTERVAL))
-    params = create_param(deviceid, ip_addr, quote(json.dumps(charge)), computeserver, registerinterval, extrainfo=hw_state)
-    req_url = url + '?' + params
+    #params = create_param(deviceid, ip_addr, quote(json.dumps(charge)), computeserver, registerinterval, extrainfo=hw_state)
+    #req_url = url + '?' + params
     d = create_dictionary(config)
     log.debug(str(url) + str(d))
     res = post_request(url, d)

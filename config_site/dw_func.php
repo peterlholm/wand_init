@@ -15,6 +15,14 @@ function battery_power_level() {
     return 88;
 }
 
+function get_temperature() {
+    $cmd = "vcgencmd measure_temp ";
+    $r = exec($cmd, $out, $result);
+    $res = preg_match("/temp=(.*).C/",$r,$m);
+    //print_r($m);
+    return $m[1];
+}
+
 # internet
 
 function internet_connection($server = 1)

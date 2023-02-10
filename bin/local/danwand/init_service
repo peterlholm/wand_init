@@ -14,13 +14,10 @@
 import os
 import platform
 import sys
-#import datetime
 import time
 import subprocess
 import logging
-#from systemd.journal import JournalHandler
-
-#from pathlib import Path
+from systemd import journal
 
 DIAS_LED_PIN = 12
 FLASH_LED_PIN = 13
@@ -73,7 +70,6 @@ def wifi_connected():
     return True
     # todo implement stable
     # out = subprocess.check_output("iwgetid", shell=True)
-
     # if len(out)==0:
     #     print("No WIFI connection")
     #     return False
@@ -104,7 +100,6 @@ def check_connections():
 
 def get_active_wifi_stations():
     "Get the number of connected stations to wifi access point"
-    #print(os.name)
     if os.name != "nt":
         out = subprocess.check_output("iw dev wlan0 station dump | grep Station | wc -l", shell=True)
     else:
@@ -119,22 +114,10 @@ if len(sys.argv)>1:
 
 hostname = os.uname()[1]
 log = logging.getLogger("dw_init")
-#log.addHandler(JournalHandler())
-log.addHandler(logging.StreamHandler(sys.stdout))
-#logging.basicConfig(filename='example.log', encoding='utf-8', level=logging.DEBUG)
-if _DEBUG:
-    #create formatter
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    #fh = logging.FileHandler("logfile.log", mode='a', encoding='utf-8')
-    fh = logging.StreamHandler()
-    fh.setFormatter(formatter)
-    log.addHandler(fh)
+log.addHandler(journal.JournalHandler())
 
-log.error("Test")
-log.setLevel(logging.INFO)
+log.setLevel(logging.DEBUG)
 log.warning(f"DanWand INIT service Starting on {hostname}")
-
-
 starttime = time.time()
 COUNTER = 0
 RUNNING = True

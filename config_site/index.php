@@ -24,6 +24,7 @@
     <?php
     require('func.php');
     require('dw_func.php');
+    $admin = "";
     require('menu.php');
     $hidesignal = "";
     $hostname = gethostname();
@@ -33,6 +34,7 @@
     $power = battery_power_level();
     $power = 0;
     $signal = wifi_signal_level();
+    $temperature = get_temperature();
     if ($signal=="") $hidesignal="d-none";
     $internet = internet_connection()?"OK":"Error";
     $cloud_service = internet_connection(2)?"OK":"Error";
@@ -122,6 +124,14 @@
         </div>
         <div class="col-4">
           <img src="pic/lightning.png" class="<?=$charging?>" height=20 />
+        </div>
+      </div>
+      <div class="row justify-content-center">
+        <div class="col-4">
+          <label>Internal Temperature</label>
+        </div>
+        <div class="col-4">
+          <?=$temperature?>&deg;C
         </div>
       </div>
       <div class="row justify-content-center disable_meter">
