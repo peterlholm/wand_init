@@ -203,7 +203,7 @@ def post_request(post_url, jsondata):
 hostname = os.uname()[1]
 log = logging.getLogger('danwand-service')
 log.addHandler(journal.JournalHandler())
-log.addHandler(logging.StreamHandler(sys.stdout))
+#log.addHandler(logging.StreamHandler(sys.stdout))
 log.setLevel(logging.INFO)
 log.error("Error test")
 log.warning(f"DanWand service Starting on {hostname}")

@@ -32,8 +32,9 @@ help :
 # common
 
 pull:
-	git fetch --all
-	git reset --hard
+	git fetch
+	git reset --hard HEAD
+	git merge '@{u}'
 
 check_sw:
 	@echo "Updaten used sw"
