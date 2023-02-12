@@ -36,7 +36,7 @@ API_KEY = "92dfe5e2-e433-4935-9252-e1628f2abd83"
 PING_HOST="8.8.8.8"
 REBOOT_CONFIG_TIME = 61
 REGISTERINTERVAL = 300
-APISERVER = "http://api.danbots.com/api/v1/"
+DEFAULT_APISERVER = "http://api.danbots.com/api/v1/"
 COMPUTESERVER = "http://compute.danbots.com/api/"
 REGISTERPATH = "register"
 CLOSEPATH = "shutdown"
@@ -62,6 +62,8 @@ HWLIB_ENABLE=False
 #         mybat = bat.Battery
 #         print (mybat.voltage)
 
+config = configparser.ConfigParser()
+
 _DEBUG = True
 
 def get_hw_info():
@@ -74,7 +76,6 @@ def get_hw_info():
     return hw_info
 
 HW_MODEL = quote_plus(get_hw_info())
-config = configparser.ConfigParser()
 
 def receive_signal(signal_number, frame):   # pylint: disable=unused-argument
     "signal handling"
@@ -106,7 +107,7 @@ def get_ip():
         ipaddr = "1.2.3.4"
     return ipaddr
 
-def create_url(apiserv=APISERVER):
+def create_url(apiserv):
     "Create regiser url"
     return apiserv + REGISTERPATH
 
@@ -215,7 +216,6 @@ def send_event(data, level='Info'):
 
 ############  starting #############
 
-
 hostname = os.uname()[1]
 log = logging.getLogger('danwand-service')
 log.addHandler(journal.JournalHandler())
@@ -231,37 +231,36 @@ signal.signal(signal.SIGTERM, receive_signal)
 signal.signal(signal.SIGINT, receive_signal)
 
 serial = get_serial()
-if serial:
-    if not Path(CONFIGFILE).exists():
-        log.warning(str(CONFIGFILE) + " does not exist")
-        Path(CONFIGFILE).touch(mode=777)
-    with open(CONFIGFILE, 'r', encoding="UTF-8") as fd:
-        config.read_file(fd)
-    if not config.has_section('device'):
-        config.add_section('device')
-        log.info("Adding device section")
-    if serial != config['device'].get('deviceid'):
-        log.info("Saving serial "+str(serial) + "on " + str(config['device'].get('deviceid')))
-        config['device']['deviceid'] = serial
-        save_config()
-    if not config.has_section('server'):
-        log.info("adding server section")
-        config.add_section('server')
-        config['server']['apiserver'] = APISERVER
-        config['server']['computeserver'] = COMPUTESERVER
-        config['server']['registerinterval'] = str(REGISTERINTERVAL)
-        save_config()
+
+if not Path(CONFIGFILE).exists():
+    log.warning(str(CONFIGFILE) + " does not exist")
+    Path(CONFIGFILE).touch(mode=777)
+with open(CONFIGFILE, 'r', encoding="UTF-8") as fd:
+    config.read_file(fd)
+if not config.has_section('device'):
+    config.add_section('device')
+    log.info("Adding device section")
+if serial != config['device'].get('deviceid'):
+    log.info("Saving serial "+str(serial) + "on " + str(config['device'].get('deviceid')))
+    config['device']['deviceid'] = serial
+    save_config()
+if not config.has_section('server'):
+    log.info("adding server section")
+    config.add_section('server')
+    config['server']['apiserver'] = DEFAULT_APISERVER
+    config['server']['computeserver'] = COMPUTESERVER
+    config['server']['registerinterval'] = str(REGISTERINTERVAL)
+    save_config()
 
 deviceid = config['device']['deviceid']
+apiserver = config['server']['apiserver']
 
 # check_debug(config)
 
-apiserver = APISERVER
 connection_error = False
-TICK = 5
+TICK = 5    # initial sleep 5*5 sek
 lastreg = False
 while LOOPING:
-    #TICK -= 5
     if TICK > 0:
         time.sleep(5)
         TICK -= 1
@@ -274,9 +273,9 @@ while LOOPING:
         _DEBUG = config['server'].get('debug')
     #log.debug('Sections: ' + str(config.sections()))
     if connection_error:
-        apiserver = APISERVER
+        apiserver = DEFAULT_APISERVER
     else:
-        apiserver = config['server'].get('apiserver',APISERVER)
+        apiserver = config['server'].get('apiserver')
     log.debug("API server: "+ apiserver)
     url = create_url(apiserver)
     deviceid = config['device']['deviceid']
@@ -291,7 +290,9 @@ while LOOPING:
     d = create_dictionary(config)
     log.debug(str(url) + str(d))
     res = post_request(url, d)
-    connection_error = True
+    if not res:
+        connection_error = True
+        log.info("Setting connection Error")
     TICK = -1
     if res != lastreg:
         log.info("Registration " + str(res))
